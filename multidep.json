@@ -1,0 +1,11 @@
+{
+  "externalDependencies":{
+    "lodash": true,
+    "kefir": true,
+    "domjs": true,
+    "stampit": true,
+    "mutation-summary": true,
+    "moysklad-router": true,
+    "simulate": true
+  }
+}
