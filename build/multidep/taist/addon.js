@@ -1,12 +1,12 @@
 function init() {
 
   function startModule(define, taistApi, entryPoint) {
-    define("@wmakeev/moysklad-module-ui@0.0.2", ["multiver!kefir@2.7.0","multiver!simulate@0.0.4","multiver!mutation-summary@0.0.0","multiver!lodash@3.9.3","multiver!stampit@1.2.0","multiver!moysklad-router@default","multiver!domjs@0.2.3"], function() {
+    define("@wmakeev/moysklad-module-ui@0.0.2", ["multiver!lodash@^3.9.3","multiver!kefir@^2.7.0","multiver!mutation-summary@0.0.0","multiver!simulate@0.0.4","multiver!moysklad-router@*","multiver!stampit@^1.2.0","multiver!domjs@^0.2.3"], function() {
   var global = window;
   var __global_require__ = require;
   var __args__ = arguments;
   var require = (function() {
-    var deps = ["kefir@2.7.0","simulate@0.0.4","mutation-summary@0.0.0","lodash@3.9.3","stampit@1.2.0","moysklad-router@default","domjs@0.2.3"].reduce(function(res, dep, index) {
+    var deps = ["lodash@^3.9.3","kefir@^2.7.0","mutation-summary@0.0.0","simulate@0.0.4","moysklad-router@*","stampit@^1.2.0","domjs@^0.2.3"].reduce(function(res, dep, index) {
       res[dep] = index;
       return res;
     }, {});
@@ -396,7 +396,7 @@ function init() {
 /* 1 */
 /***/ function(module, exports) {
 
-	module.exports = require("lodash@3.9.3");
+	module.exports = require("lodash@^3.9.3");
 
 /***/ },
 /* 2 */
@@ -408,13 +408,13 @@ function init() {
 /* 3 */
 /***/ function(module, exports) {
 
-	module.exports = require("kefir@2.7.0");
+	module.exports = require("kefir@^2.7.0");
 
 /***/ },
 /* 4 */
 /***/ function(module, exports) {
 
-	module.exports = require("moysklad-router@default");
+	module.exports = require("moysklad-router@*");
 
 /***/ },
 /* 5 */
@@ -631,7 +631,7 @@ function init() {
 /* 12 */
 /***/ function(module, exports) {
 
-	module.exports = require("stampit@1.2.0");
+	module.exports = require("stampit@^1.2.0");
 
 /***/ },
 /* 13 */
@@ -665,7 +665,7 @@ function init() {
 /* 14 */
 /***/ function(module, exports) {
 
-	module.exports = require("domjs@0.2.3");
+	module.exports = require("domjs@^0.2.3");
 
 /***/ },
 /* 15 */
