@@ -1,9 +1,9 @@
-define("moysklad-module-ui@0.1.0-beta.2", ["multiver!lodash@3.9.3","multiver!mutation-summary@0.0.0","multiver!kefir@2.7.0","multiver!simulate@0.0.4","multiver!stampit@1.2.0","multiver!moysklad-router@default","multiver!domjs@0.2.3"], function() {
+define("@wmakeev/moysklad-module-ui@0.0.2", ["multiver!kefir@2.7.0","multiver!lodash@3.9.3","multiver!mutation-summary@0.0.0","multiver!simulate@0.0.4","multiver!stampit@1.2.0","multiver!moysklad-router@default","multiver!domjs@0.2.3"], function() {
   var global = window;
   var __global_require__ = require;
   var __args__ = arguments;
   var require = (function() {
-    var deps = ["lodash@3.9.3","mutation-summary@0.0.0","kefir@2.7.0","simulate@0.0.4","stampit@1.2.0","moysklad-router@default","domjs@0.2.3"].reduce(function(res, dep, index) {
+    var deps = ["kefir@2.7.0","lodash@3.9.3","mutation-summary@0.0.0","simulate@0.0.4","stampit@1.2.0","moysklad-router@default","domjs@0.2.3"].reduce(function(res, dep, index) {
       res[dep] = index;
       return res;
     }, {});
