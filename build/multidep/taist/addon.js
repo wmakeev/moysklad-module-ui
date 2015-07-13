@@ -1,11 +1,12 @@
 function init() {
 
   function startModule(define, taistApi, entryPoint) {
-    define("moysklad-module-ui@0.1.0-beta.1", ["multiver!lodash@3.9.3","multiver!kefir@2.7.0","multiver!simulate@0.0.4","multiver!mutation-summary@0.0.0","multiver!moysklad-router@default"], function() {
+    define("moysklad-module-ui@0.1.0-beta.2", ["multiver!lodash@3.9.3","multiver!kefir@2.7.0","multiver!simulate@0.0.4","multiver!mutation-summary@0.0.0","multiver!stampit@1.2.0","multiver!moysklad-router@default","multiver!domjs@0.2.3"], function() {
+  var global = window;
   var __global_require__ = require;
   var __args__ = arguments;
   var require = (function() {
-    var deps = ["lodash@3.9.3","kefir@2.7.0","simulate@0.0.4","mutation-summary@0.0.0","moysklad-router@default"].reduce(function(res, dep, index) {
+    var deps = ["lodash@3.9.3","kefir@2.7.0","simulate@0.0.4","mutation-summary@0.0.0","stampit@1.2.0","moysklad-router@default","domjs@0.2.3"].reduce(function(res, dep, index) {
       res[dep] = index;
       return res;
     }, {});
@@ -114,7 +115,15 @@ function init() {
 
 	var _utils2 = _interopRequireDefault(_utils);
 
-	var _bufferedMenubaritemsModificationsEmiter = __webpack_require__(9);
+	var _controlsIndex = __webpack_require__(10);
+
+	var _controlsIndex2 = _interopRequireDefault(_controlsIndex);
+
+	var _appUiConst = __webpack_require__(9);
+
+	var uiConst = _interopRequireWildcard(_appUiConst);
+
+	var _bufferedMenubaritemsModificationsEmiter = __webpack_require__(19);
 
 	var _bufferedMenubaritemsModificationsEmiter2 = _interopRequireDefault(_bufferedMenubaritemsModificationsEmiter);
 
@@ -141,211 +150,231 @@ function init() {
 	  var off = sb.off;
 	  var once = sb.once;
 	  var emit = sb.emit;
-	  var UI = sb.UI;
+	  var add = sb.add;
+	  var fadeIn = sb.fadeIn;
+	  var fadeOut = sb.fadeOut;
 
 	  return {
 
 	    init: function init(_ref) {
 	      var appName = _ref.appName;
+	      var dataAppId, menuItemBlockClass, glassPanel;
+	      return regeneratorRuntime.async(function init$(context$2$0) {
+	        while (1) switch (context$2$0.prev = context$2$0.next) {
+	          case 0:
+	            dataAppId = uiConst.getDataAppId(appName);
+	            menuItemBlockClass = uiConst.getMenuItemBlock(appName);
 
-	      var dataAppId = 'data-' + appName + '-id';
-	      var menuItemBlockClassName = '' + appName + '-menuitem-block';
-	      // let appUidPrefix              = `${appName}-uid-`;
-	      // let appMenuItemClassName      = `${appName}-MenuItem`;
+	            // let appUidPrefix              = `${appName}-uid-`;
+	            // let appMenuItemClassName      = `${appName}-MenuItem`;
 
-	      router.start();
-	      uiItemsModificationsStream = _kefir2['default'].pool();
+	            router.start();
+	            uiItemsModificationsStream = _kefir2['default'].pool();
 
-	      on('add', function (ch, data) {
-	        // TODO Интерфейс продумать
-	        if (data instanceof Array) {
-	          data.forEach(function (_ref2) {
-	            var item = _ref2.item;
-	            var options = _ref2.options;
+	            on('add', function (ch, data) {
+	              var controls = [];
+	              (data instanceof Array ? data : [data]).forEach(function (_ref2) {
+	                var item = _ref2.item;
+	                var options = _ref2.options;
 
-	            uiItemsModificationsStream.plug(_kefir2['default'].constant({
-	              type: 'add', item: item, options: options
-	            }));
-	          });
-	        } else {
-	          throw new Error('add event argument must be an array');
-	        }
-	      });
-
-	      // TODO Синхронно?
-	      // TODO Интерфейс продумать
-	      // TODO Как передать аргументы в template()
-	      $glassPanel = (0, _jquery2['default'])(UI.add({ type: 'GlassPanel' })).hide().appendTo(document.body);
-	      on('fadeIn', function () {
-	        return $glassPanel.show();
-	      });
-	      on('fadeOut', function () {
-	        return $glassPanel.hide();
-	      });
-
-	      // Все заданные измемения на странице
-	      mutationsStream = _kefir2['default'].stream(function foo(emitter) {
-	        var observer;
-	        return regeneratorRuntime.async(function foo$(context$3$0) {
-	          while (1) switch (context$3$0.prev = context$3$0.next) {
-	            case 0:
-	              observer = new _mutationSummary2['default']({
-	                callback: function callback(summaries) {
-	                  return summaries.forEach(function (summary) {
-	                    return emitter.emit(summary);
-	                  });
-	                },
-	                queries: _queries2['default']
+	                var controlStamp = _controlsIndex2['default'][item.type]({ appName: appName });;
+	                if (controlStamp) {
+	                  var control = controlStamp(_lodash2['default'].omit(item, 'type'));
+	                  uiItemsModificationsStream.plug(_kefir2['default'].constant({
+	                    type: 'add', control: control, options: options
+	                  }));
+	                  controls.push(control);
+	                } else {
+	                  uiItemsModificationsStream.plug(_kefir2['default'].constantError(new Error('Can\'t find control type [' + item.type + ']')));
+	                  controls.push(null);
+	                }
 	              });
-	              context$3$0.next = 3;
-	              return regeneratorRuntime.awrap(once('destroy'));
+	              return data instanceof Array ? controls : controls[0];
+	            });
 
-	            case 3:
-	              emitter.end();
-	              observer.disconnect();
+	            context$2$0.next = 7;
+	            return regeneratorRuntime.awrap(add({ type: 'GlassPanel' }));
 
-	            case 5:
-	            case 'end':
-	              return context$3$0.stop();
-	          }
-	        }, null, this);
-	      });
+	          case 7:
+	            glassPanel = context$2$0.sent;
 
-	      routesStream = _kefir2['default'].fromEvents(router, 'route');
+	            $glassPanel = (0, _jquery2['default'])(glassPanel.el).hide().appendTo(document.body);
+	            on('fadeIn', function () {
+	              return $glassPanel.show();
+	            });
+	            on('fadeOut', function () {
+	              return $glassPanel.hide();
+	            });
 
-	      // Дбавленные в DOM элементы
-	      addedDomElementsStream = mutationsStream.map(_lodash2['default'].property('added')).flatten();
+	            // Все заданные измемения на странице
+	            mutationsStream = _kefir2['default'].stream(function foo(emitter) {
+	              var observer;
+	              return regeneratorRuntime.async(function foo$(context$3$0) {
+	                while (1) switch (context$3$0.prev = context$3$0.next) {
+	                  case 0:
+	                    observer = new _mutationSummary2['default']({
+	                      callback: function callback(summaries) {
+	                        return summaries.forEach(function (summary) {
+	                          return emitter.emit(summary);
+	                        });
+	                      },
+	                      queries: _queries2['default']
+	                    });
+	                    context$3$0.next = 3;
+	                    return regeneratorRuntime.awrap(once('destroy'));
 
-	      addedMenubarsStream = addedDomElementsStream.filter(utils.isRole('menubar'));
+	                  case 3:
+	                    emitter.end();
+	                    observer.disconnect();
 
-	      mouseDownStream = _kefir2['default'].fromEvents(document.body, 'mousedown');
+	                  case 5:
+	                  case 'end':
+	                    return context$3$0.stop();
+	                }
+	              }, null, this);
+	            });
 
-	      mouseClickStream = _kefir2['default'].fromEvents(document.body, 'click');
+	            routesStream = _kefir2['default'].fromEvents(router, 'route');
 
-	      pushDownButtonsStream = mouseDownStream.map(utils.mouseEventToRoleElementMapper('button')).filter(_lodash2['default'].negate(_lodash2['default'].isNull));
+	            // Дбавленные в DOM элементы
+	            addedDomElementsStream = mutationsStream.map(_lodash2['default'].property('added')).flatten();
 
-	      // clickedButtonsStream = mouseClickStream
-	      //   .map(utils.mouseEventToRoleElementMapper('button'))
-	      //   .filter(_.negate(_.isNull));
+	            addedMenubarsStream = addedDomElementsStream.filter(utils.isRole('menubar'));
 
-	      clickedMenuItemsStream = mouseClickStream.map(utils.mouseEventToRoleElementMapper('menuitem')).filter(_lodash2['default'].negate(_lodash2['default'].isNull));
+	            mouseDownStream = _kefir2['default'].fromEvents(document.body, 'mousedown');
 
-	      poppedUpMenubarsStream = pushDownButtonsStream.sampledBy(addedMenubarsStream).map(utils.getButtonName).zip(addedMenubarsStream).map(function (val) {
-	        return { name: val[0], el: val[1] };
-	      });
+	            mouseClickStream = _kefir2['default'].fromEvents(document.body, 'click');
 
-	      appContextProperty = routesStream.map(function (state) {
-	        return state.section + (state.action ? '/' + state.action : '');
-	      }).toProperty(function () {
-	        return router.getHashPath();
-	      });
+	            pushDownButtonsStream = mouseDownStream.map(utils.mouseEventToRoleElementMapper('button')).filter(_lodash2['default'].negate(_lodash2['default'].isNull));
 
-	      poppedUpMenubarInfosStream = appContextProperty.sampledBy(addedMenubarsStream).zip(poppedUpMenubarsStream).map(function (val) {
-	        var _val = _slicedToArray(val, 2);
+	            // clickedButtonsStream = mouseClickStream
+	            //   .map(utils.mouseEventToRoleElementMapper('button'))
+	            //   .filter(_.negate(_.isNull));
 
-	        var appContext = _val[0];
-	        var popedUpMenubarInfo = _val[1];
+	            clickedMenuItemsStream = mouseClickStream.map(utils.mouseEventToRoleElementMapper('menuitem')).filter(_lodash2['default'].negate(_lodash2['default'].isNull));
 
-	        // { name, el, context }
-	        return _lodash2['default'].extend({}, popedUpMenubarInfo, {
-	          context: appContext
-	        });
-	      });
+	            poppedUpMenubarsStream = pushDownButtonsStream.sampledBy(addedMenubarsStream).map(utils.getButtonName).zip(addedMenubarsStream).map(function (val) {
+	              return { name: val[0], el: val[1] };
+	            });
 
-	      menuItemsModificationsStream = uiItemsModificationsStream.filter(function (value) {
-	        return ['MenuItem', 'MenuBarSeparator'].indexOf(value.item.type) !== -1;
-	      });
+	            appContextProperty = routesStream.map(function (state) {
+	              return state.section + (state.action ? '/' + state.action : '');
+	            }).toProperty(function () {
+	              return router.getHashPath();
+	            });
 
-	      // { menubar: { name, el, context }, modifications: [{ type, item, options }] }
-	      poppedUpMenubarModificationsStream = poppedUpMenubarInfosStream.withHandler((0, _bufferedMenubaritemsModificationsEmiter2['default'])(menuItemsModificationsStream));
+	            poppedUpMenubarInfosStream = appContextProperty.sampledBy(addedMenubarsStream).zip(poppedUpMenubarsStream).map(function (val) {
+	              var _val = _slicedToArray(val, 2);
 
-	      // Отслеживаем и добавляем новые элементы в меню
-	      poppedUpMenubarModificationsStream.onValue(function (value) {
-	        var menuEl = value.menubar.el;
-	        var modifications = value.modifications;
-	        var menuItems = (0, _lodash2['default'])(modifications).filter({
-	          type: 'add'
-	        }).map(function (mod) {
-	          return mod.item.render();
-	        }).value();
+	              var appContext = _val[0];
+	              var popedUpMenubarInfo = _val[1];
 
-	        utils.appendMenuBarItems(menuItemBlockClassName, menuEl, menuItems);
-	      });
+	              // { name, el, context }
+	              return _lodash2['default'].extend({}, popedUpMenubarInfo, {
+	                context: appContext
+	              });
+	            });
 
-	      // Обработка нажатий на элементы меню
-	      // { type, item, options }
-	      menuItemsModificationsStream.onValue(function (_ref3) {
-	        var type = _ref3.type;
-	        var item = _ref3.item;
+	            menuItemsModificationsStream = uiItemsModificationsStream.filter(function (value) {
+	              return ['MenuItem', 'MenuBarSeparator'].indexOf(value.item.type) !== -1;
+	            });
 
-	        if (type === 'add') {
-	          clickedMenuItemsStream.onValue(function callee$3$0(menuitemEl) {
-	            var id, action, result;
-	            return regeneratorRuntime.async(function callee$3$0$(context$4$0) {
-	              while (1) switch (context$4$0.prev = context$4$0.next) {
-	                case 0:
-	                  if (!menuitemEl.getAttribute) {
-	                    context$4$0.next = 25;
-	                    break;
-	                  }
+	            // { menubar: { name, el, context }, modifications: [{ type, item, options }] }
+	            poppedUpMenubarModificationsStream = poppedUpMenubarInfosStream.withHandler((0, _bufferedMenubaritemsModificationsEmiter2['default'])(menuItemsModificationsStream));
 
-	                  id = menuitemEl.getAttribute(dataAppId);
+	            // Отслеживаем и добавляем новые элементы в меню
+	            poppedUpMenubarModificationsStream.onValue(function (value) {
+	              var menuEl = value.menubar.el;
+	              var modifications = value.modifications;
+	              var menuItems = (0, _lodash2['default'])(modifications).filter({
+	                type: 'add'
+	              }).map(function (mod) {
+	                return mod.item.render();
+	              }).value();
 
-	                  if (!(id === item.id)) {
-	                    context$4$0.next = 25;
-	                    break;
-	                  }
+	              utils.appendMenuBarItems(menuItemBlockClass, menuEl, menuItems);
+	            });
 
-	                  _simulate2['default'].mousedown(document.getElementById('site'));
-	                  action = item.action;
+	            // Обработка нажатий на элементы меню
+	            // { type, item, options }
+	            menuItemsModificationsStream.onValue(function (_ref3) {
+	              var type = _ref3.type;
+	              var item = _ref3.item;
 
-	                  if (!action) {
-	                    context$4$0.next = 25;
-	                    break;
-	                  }
+	              if (type === 'add') {
+	                clickedMenuItemsStream.onValue(function callee$3$0(menuitemEl) {
+	                  var id, action, result;
+	                  return regeneratorRuntime.async(function callee$3$0$(context$4$0) {
+	                    while (1) switch (context$4$0.prev = context$4$0.next) {
+	                      case 0:
+	                        if (!menuitemEl.getAttribute) {
+	                          context$4$0.next = 25;
+	                          break;
+	                        }
 
-	                  context$4$0.next = 8;
-	                  return regeneratorRuntime.awrap((0, _utils2['default'])(100));
+	                        id = menuitemEl.getAttribute(dataAppId);
 
-	                case 8:
-	                  UI.fadeIn();
-	                  context$4$0.next = 11;
-	                  return regeneratorRuntime.awrap((0, _utils2['default'])(100));
+	                        if (!(id === item.id)) {
+	                          context$4$0.next = 25;
+	                          break;
+	                        }
 
-	                case 11:
-	                  result = undefined;
-	                  context$4$0.prev = 12;
-	                  context$4$0.next = 15;
-	                  return regeneratorRuntime.awrap(action(item));
+	                        _simulate2['default'].mousedown(document.getElementById('site'));
+	                        action = item.action;
 
-	                case 15:
-	                  result = context$4$0.sent;
-	                  context$4$0.next = 23;
-	                  break;
+	                        if (!action) {
+	                          context$4$0.next = 25;
+	                          break;
+	                        }
 
-	                case 18:
-	                  context$4$0.prev = 18;
-	                  context$4$0.t0 = context$4$0['catch'](12);
+	                        context$4$0.next = 8;
+	                        return regeneratorRuntime.awrap((0, _utils2['default'])(100));
 
-	                  // TODO alert;
-	                  alert('Ошибка: ' + context$4$0.t0.message);
-	                  emit('error', context$4$0.t0);
-	                  console.error(context$4$0.t0);
+	                      case 8:
+	                        fadeIn();
+	                        context$4$0.next = 11;
+	                        return regeneratorRuntime.awrap((0, _utils2['default'])(100));
 
-	                case 23:
-	                  if (result) {
-	                    console.log(result);
-	                  }
-	                  UI.fadeOut(); // $glassPanel.hide();
+	                      case 11:
+	                        result = undefined;
+	                        context$4$0.prev = 12;
+	                        context$4$0.next = 15;
+	                        return regeneratorRuntime.awrap(action(item));
 
-	                case 25:
-	                case 'end':
-	                  return context$4$0.stop();
+	                      case 15:
+	                        result = context$4$0.sent;
+	                        context$4$0.next = 23;
+	                        break;
+
+	                      case 18:
+	                        context$4$0.prev = 18;
+	                        context$4$0.t0 = context$4$0['catch'](12);
+
+	                        // TODO alert;
+	                        alert('Ошибка: ' + context$4$0.t0.message);
+	                        emit('error', context$4$0.t0);
+	                        console.error(context$4$0.t0);
+
+	                      case 23:
+	                        if (result) {
+	                          console.log(result);
+	                        }
+	                        fadeOut(); // $glassPanel.hide();
+
+	                      case 25:
+	                      case 'end':
+	                        return context$4$0.stop();
+	                    }
+	                  }, null, this, [[12, 18]]);
+	                });
 	              }
-	            }, null, this, [[12, 18]]);
-	          });
+	            });
+
+	          case 26:
+	          case 'end':
+	            return context$2$0.stop();
 	        }
-	      });
+	      }, null, this);
 	    },
 
 	    destroy: function destroy() {
@@ -359,6 +388,8 @@ function init() {
 	};
 
 	module.exports = exports['default'];
+	// TODO Интерфейс продумать
+	// TODO Как передать аргументы в template()
 	// console.log(`Нажато меню: ${item.name}`);
 
 /***/ },
@@ -438,6 +469,10 @@ function init() {
 
 	var _lodash2 = _interopRequireDefault(_lodash);
 
+	var _appUiConst = __webpack_require__(9);
+
+	var _appUiConst2 = _interopRequireDefault(_appUiConst);
+
 	function getButtonName(buttonEl) {
 	    return (0, _jquery2['default'])('span.text', buttonEl).text();
 	}
@@ -482,6 +517,306 @@ function init() {
 
 /***/ },
 /* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+	exports.getDataAppId = getDataAppId;
+	exports.getMenuItemBlock = getMenuItemBlock;
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _lodash = __webpack_require__(1);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	function getDataAppId(appName) {
+	  return 'data-' + appName + '-id';
+	}
+
+	function getMenuItemBlock(appName) {
+	  return '' + appName + '-menuitem-block';
+	}
+
+	var getControlItemClass = _lodash2['default'].curry(function (appName, controlType) {
+	  return '' + appName + '-' + controlType;
+	});
+	exports.getControlItemClass = getControlItemClass;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+	var _menuItem = __webpack_require__(11);
+
+	var _menuItem2 = _interopRequireDefault(_menuItem);
+
+	var _glassPanel = __webpack_require__(16);
+
+	var _glassPanel2 = _interopRequireDefault(_glassPanel);
+
+	var _menubarSeparator = __webpack_require__(18);
+
+	var _menubarSeparator2 = _interopRequireDefault(_menubarSeparator);
+
+	exports.MenuItem = _menuItem2["default"];
+	exports.GlassPanel = _glassPanel2["default"];
+	exports.MenubarSeparator = _menubarSeparator2["default"];
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+	exports['default'] = menuItemStamp;
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _stampit = __webpack_require__(12);
+
+	var _stampit2 = _interopRequireDefault(_stampit);
+
+	var _behaviorsRenderable = __webpack_require__(13);
+
+	var _behaviorsRenderable2 = _interopRequireDefault(_behaviorsRenderable);
+
+	var _behaviorsUniqId = __webpack_require__(15);
+
+	var _behaviorsUniqId2 = _interopRequireDefault(_behaviorsUniqId);
+
+	var _appUiConst = __webpack_require__(9);
+
+	var uiConst = _interopRequireWildcard(_appUiConst);
+
+	function menuItemStamp(_ref) {
+	  var appName = _ref.appName;
+
+	  var menuItemBlockClass = uiConst.getMenuItemBlock(appName);
+	  var menuItemClass = uiConst.getControlItemClass(appName, 'MenuItem');
+	  return (0, _stampit2['default'])().state({
+	    type: 'MenuItem',
+	    template: function template() {
+	      /*global tr, td*/
+	      var tdOptions = {
+	        'class': ['gwt-MenuItem', menuItemClass].join(' '),
+	        'role': 'menuitem',
+	        'colspan': 2
+	      };
+	      tdOptions['data-' + appName + '-id'] = this.id;
+	      return tr({ 'class': [menuItemBlockClass, this.id].join(' ') }, td(tdOptions, this.name));
+	    }
+	  }).compose(_behaviorsRenderable2['default'], (0, _behaviorsUniqId2['default'])(appName));
+	}
+
+	module.exports = exports['default'];
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	module.exports = require("stampit@1.2.0");
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _stampit = __webpack_require__(12);
+
+	var _stampit2 = _interopRequireDefault(_stampit);
+
+	var _domjs = __webpack_require__(14);
+
+	var _domjs2 = _interopRequireDefault(_domjs);
+
+	exports['default'] = (0, _stampit2['default'])().methods({
+	  render: function render() {
+	    this.el = _domjs2['default'].build(this.template.bind(this));
+	    return this.el;
+	  }
+	});
+	module.exports = exports['default'];
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	module.exports = require("domjs@0.2.3");
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _stampit = __webpack_require__(12);
+
+	var _stampit2 = _interopRequireDefault(_stampit);
+
+	var _lodash = __webpack_require__(1);
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	exports['default'] = function (appName) {
+	    var _this = this;
+
+	    return (0, _stampit2['default'])().enclose(function () {
+	        _this.id = _lodash2['default'].uniqueId(appName + '-id-');
+	    });
+	};
+
+	module.exports = exports['default'];
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _stampit = __webpack_require__(12);
+
+	var _stampit2 = _interopRequireDefault(_stampit);
+
+	var _behaviorsRenderable = __webpack_require__(13);
+
+	var _behaviorsRenderable2 = _interopRequireDefault(_behaviorsRenderable);
+
+	var _behaviorsHideable = __webpack_require__(17);
+
+	var _behaviorsHideable2 = _interopRequireDefault(_behaviorsHideable);
+
+	var _behaviorsUniqId = __webpack_require__(15);
+
+	var _behaviorsUniqId2 = _interopRequireDefault(_behaviorsUniqId);
+
+	exports['default'] = function (_ref) {
+	    var appName = _ref.appName;
+
+	    return (0, _stampit2['default'])().state({
+	        type: 'GlassPanel',
+	        template: function template() {
+	            /*global div*/
+	            return div({
+	                'class': 'b-lognex-glass-panel',
+	                'style': 'z-index: 5;'
+	            });
+	        }
+	    }).compose(_behaviorsRenderable2['default'], _behaviorsHideable2['default'], (0, _behaviorsUniqId2['default'])(appName));
+	};
+
+	module.exports = exports['default'];
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _stampit = __webpack_require__(12);
+
+	var _stampit2 = _interopRequireDefault(_stampit);
+
+	var _jquery = __webpack_require__(2);
+
+	var _jquery2 = _interopRequireDefault(_jquery);
+
+	exports['default'] = (0, _stampit2['default'])().methods({
+	  hide: function hide() {
+	    (0, _jquery2['default'])(this.el).hide();
+	  },
+	  show: function show() {
+	    (0, _jquery2['default'])(this.el).show();
+	  }
+	});
+	module.exports = exports['default'];
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	    value: true
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+	var _stampit = __webpack_require__(12);
+
+	var _stampit2 = _interopRequireDefault(_stampit);
+
+	var _behaviorsRenderable = __webpack_require__(13);
+
+	var _behaviorsRenderable2 = _interopRequireDefault(_behaviorsRenderable);
+
+	var _behaviorsUniqId = __webpack_require__(15);
+
+	var _behaviorsUniqId2 = _interopRequireDefault(_behaviorsUniqId);
+
+	exports['default'] = function (_ref) {
+	    var appName = _ref.appName;
+	    var menuItemClass = _ref.menuItemClass;
+	    var menuItemBlockClass = _ref.menuItemBlockClass;
+
+	    return (0, _stampit2['default'])().state({
+	        type: 'MenuBarSeparator',
+	        template: function template() {
+	            tr({ 'class': [menuItemBlockClass, this.id].join(' ') }, td({
+	                'class': ['gwt-MenuItemSeparator', menuItemClass].join(' '),
+	                'colspan': 2
+	            }, div({ 'class': 'menuSeparatorInner' })));
+	        }
+	    }).compose(_behaviorsRenderable2['default'], (0, _behaviorsUniqId2['default'])(appName));
+	};
+
+	;
+	module.exports = exports['default'];
+
+/***/ },
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';

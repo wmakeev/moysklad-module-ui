@@ -1,13 +1,10 @@
-/**
- * renderable
- * Date: 10.06.15
- * Vitaliy V. Makeev (w.makeev@gmail.com)
- */
-
 import stampit from 'stampit';
+import dom from 'domjs';
+
 
 export default stampit().methods({
-    render: () => {
-        return dom.build(this.template.bind(this));
-    }
-})
+  render() {
+    this.el = dom.build(this.template.bind(this))
+    return this.el;
+  }
+});

@@ -1,5 +1,6 @@
 import stampit      from 'stampit';
 import renderable   from './behaviors/renderable';
+import hideable     from './behaviors/hideable';
 import uniqId       from './behaviors/uniq-id';
 
 
@@ -15,5 +16,5 @@ export default function({ appName }) {
                 });
             }
         })
-        .compose(renderable, uniqId(appName));
+        .compose(renderable, hideable, uniqId(appName));
 }

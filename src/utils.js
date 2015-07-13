@@ -6,16 +6,17 @@
 
 import $ from 'jquery';
 import _ from 'lodash';
+import uiConst from './app-ui-const';
 
-export function getButtonName (buttonEl) {
+export function getButtonName(buttonEl) {
     return $('span.text', buttonEl).text();
 }
 
-export const isRole = _.curry(function (role, el) {
+export const isRole = _.curry(function(role, el) {
     return el.getAttribute && el.getAttribute('role') === role;
 });
 
-export const appendMenuBarItems = _.curry(function (menuItemBlockClass, menubar, items) {
+export const appendMenuBarItems = _.curry(function(menuItemBlockClass, menubar, items) {
     let $lastMenuItem = $(`.${menuItemBlockClass}:last`, menubar);
     if ($lastMenuItem.length) {
         $lastMenuItem.after(items);
@@ -25,7 +26,7 @@ export const appendMenuBarItems = _.curry(function (menuItemBlockClass, menubar,
 });
 
 export const mouseEventToElementMapper =
-  _.curry(function (predicate, mouseEvent) {
+  _.curry(function(predicate, mouseEvent) {
     for (let i = mouseEvent.path.length - 1; i >= 0; i -= 1) {
         let el = mouseEvent.path[i];
         if (predicate(el)) { return el; }
