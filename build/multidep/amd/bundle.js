@@ -1,12 +1,9 @@
-function init() {
-
-  function startModule(define, taistApi, entryPoint) {
-    define("@wmakeev/moysklad-module-ui@0.0.2", ["multiver!kefir@2.7.0","multiver!mutation-summary@0.0.0","multiver!simulate@0.0.4","multiver!lodash@3.9.3","multiver!stampit@1.2.0","multiver!moysklad-router@default","multiver!domjs@0.2.3"], function() {
+define("moysklad-module-ui@0.1.0-beta.2", ["multiver!lodash@3.9.3","multiver!mutation-summary@0.0.0","multiver!kefir@2.7.0","multiver!simulate@0.0.4","multiver!stampit@1.2.0","multiver!moysklad-router@default","multiver!domjs@0.2.3"], function() {
   var global = window;
   var __global_require__ = require;
   var __args__ = arguments;
   var require = (function() {
-    var deps = ["kefir@2.7.0","mutation-summary@0.0.0","simulate@0.0.4","lodash@3.9.3","stampit@1.2.0","moysklad-router@default","domjs@0.2.3"].reduce(function(res, dep, index) {
+    var deps = ["lodash@3.9.3","mutation-summary@0.0.0","kefir@2.7.0","simulate@0.0.4","stampit@1.2.0","moysklad-router@default","domjs@0.2.3"].reduce(function(res, dep, index) {
       res[dep] = index;
       return res;
     }, {});
@@ -866,64 +863,3 @@ function init() {
 /***/ }
 /******/ ]);
 });
-
-  }
-  
-  function discoverAMD(timeout, cb) {
-  var guid = "70152108-2745-4c6a-b529-c4fe10e488a7";
-  function discover(key, handler) {
-  var discoveredEventsIds = {};
-  var publishEventName = guid + ':publish';
-  var discoverEventName = guid + ':discover';
-
-  var stop = function () {
-    window.removeEventListener(publishEventName, listener);
-  };
-
-  var listener = function (ev) {
-    ev = ev.detail;
-    if (ev && ev.id && ev.key === key && !discoveredEventsIds.hasOwnProperty(ev.id)) {
-      discoveredEventsIds[ev.id] = true;
-      handler(ev.value, stop);
-    }
-  };
-  window.addEventListener(publishEventName, listener);
-
-  var event = new CustomEvent(discoverEventName, {
-    detail: {
-      key: key
-    }
-  });
-  window.dispatchEvent(event);
-
-  return {
-    stop: stop
-  }
-}
-
-  var resolved = false;
-
-  var disc = discover('amd:ready', function (data) {
-    resolved = true;
-    disc.stop();
-    cb(null, data);
-  });
-
-  setTimeout(function () {
-    if (!resolved) {
-      disc.stop();
-      cb(new Error('Waiting for AMD timeout'));
-    }
-  }, timeout);
-}
-
-  
-  return {
-    start: function(taistApi, entryPoint) {
-      discoverAMD(15000, function (err, amd) {
-        if (err) throw err;
-        startModule(amd.define, taistApi, entryPoint);
-      })
-    }
-  };
-}
