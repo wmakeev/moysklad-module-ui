@@ -1,1 +1,9 @@
-{"siteName":"МойСклад","siteRegexp":"online.moysklad.ru","id":"@wmakeev/moysklad-module-ui","js":"addon.js","title":"@wmakeev/moysklad-module-ui@0.0.2","shortDescription":"Взаимодействие с интерфейсом приложения МойСклад","description":"addon.md"}
+{
+  "siteName": "МойСклад",
+  "siteRegexp": "online.moysklad.ru",
+  "id": "@wmakeev/moysklad-module-ui",
+  "js": "addon.js",
+  "title": "@wmakeev/moysklad-module-ui@0.0.2",
+  "shortDescription": "Взаимодействие с интерфейсом приложения МойСклад",
+  "description": "addon.md"
+}
