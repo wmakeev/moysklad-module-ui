@@ -6,7 +6,7 @@ let dom = domjs(document);
 export default stampit().methods({
   render() {
     let fragment = dom.build(this.template.bind(this));
-    this.el = document.appendChild(fragment);
+    this.el = document.body.appendChild(fragment);
     return this.el;
   }
 });
