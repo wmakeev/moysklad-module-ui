@@ -4,21 +4,21 @@ import uniqId       from './behaviors/uniq-id';
 
 
 export default function ({ appName, menuItemClass, menuItemBlockClass}) {
-    return stampit()
-        .state({
-            type: 'MenuBarSeparator',
-            template() {
-                tr(
-                    { 'class': [menuItemBlockClass, this.id].join(' ') },
-                    td(
-                        {
-                            'class': ['gwt-MenuItemSeparator', menuItemClass].join(' '),
-                            'colspan': 2
-                        },
-                        div({ 'class': 'menuSeparatorInner' })
-                    )
-                );
-            }
-        })
-        .compose(renderable, uniqId(appName))
+  return stampit()
+    .state({
+      type: 'MenuBarSeparator',
+      template() {
+        tr(
+          {'class': [menuItemBlockClass, this.id].join(' ')},
+          td(
+            {
+              'class': ['gwt-MenuItemSeparator', menuItemClass].join(' '),
+              'colspan': 2
+            },
+            div({'class': 'menuSeparatorInner'})
+          )
+        );
+      }
+    })
+    .compose(renderable, uniqId(appName))
 };

@@ -32,7 +32,7 @@ export const mouseEventToElementMapper =
         if (predicate(el)) { return el; }
     }
     return null;
-});
+  });
 
 export const mouseEventToRoleElementMapper =
   _.compose(isRole, mouseEventToElementMapper);

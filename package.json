@@ -1,11 +1,11 @@
 {
   "name": "@wmakeev/moysklad-module-ui",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Взаимодействие с интерфейсом приложения МойСклад",
   "main": "src/index.js",
   "scripts": {
     "test": "mocha",
-    "build": "multidep --export --babel 1",
+    "build": "multidep --export --named    --babel 1",
     "build-taist": "multidep --taist-site-name МойСклад --taist-site-regexp online.moysklad.ru --export --babel 1"
   },
   "repository": {
@@ -27,8 +27,9 @@
     "domjs": "^0.2.3",
     "kefir": "^2.7.0",
     "lodash": "^3.9.3",
-    "mutation-summary": "0.0.0",
-    "simulate": "0.0.4",
+    "mutation-summary": "~0.0.0",
+    "moysklad-router": "~0.3.0",
+    "simulate": "~0.0.4",
     "stampit": "^1.2.0"
   },
   "devDependencies": {

@@ -1,14 +1,14 @@
-import _                from 'lodash';
-import $                from 'jquery';
-import FRP              from 'kefir';
-import MoyskladRouter   from 'moysklad-router';
-import MutationSummary  from 'mutation-summary';
-import Simulate         from 'simulate';
-import queries          from './queries';
-import * as utils       from './utils';
-import timeout          from './utils';
-import controlsList     from './controls/index';
-import * as uiConst     from './app-ui-const';
+import _                 from 'lodash';
+import $                 from 'jquery';
+import FRP               from 'kefir';
+import MoyskladRouter    from 'moysklad-router';
+import MutationSummary   from 'mutation-summary';
+import Simulate          from 'simulate';
+import queries           from './queries';
+import * as utils        from './utils';
+import timeout           from './utils';
+import * as controlsList from './controls/index';
+import * as uiConst      from './app-ui-const';
 import bufferedMenubarItemsModificationsEmiter from './buffered-menubaritems-modifications-emiter';
 
 export default function(sb) {
@@ -35,6 +35,9 @@ export default function(sb) {
   return {
 
     async init({ appName }) {
+      if (!appName) {
+        throw new Error('appName should be provided in module options');
+      }
       let dataAppId          = uiConst.getDataAppId(appName);
       let menuItemBlockClass = uiConst.getMenuItemBlock(appName);
       // let appUidPrefix              = `${appName}-uid-`;
@@ -43,14 +46,14 @@ export default function(sb) {
       router.start();
       uiItemsModificationsStream = FRP.pool();
 
-      on('add', (ch, data) => {
+      on('add', data => {
         let controls = [];
-        (data instanceof Array ? data : [data]).forEach(({ item, options }) => {
-          let controlStamp = controlsList[item.type]({ appName });;
+        (data instanceof Array ? data : [{ item: data }]).forEach(({ item, options }) => {
+          let controlStamp = controlsList[item.type]({ appName });
           if (controlStamp) {
-            let control = controlStamp(_.omit(item, 'type'))
+            let control = controlStamp(_.omit(item, 'type'));
             uiItemsModificationsStream.plug(FRP.constant({
-              type: 'add', control, options
+              type: 'add', item: control, options
             }));
             controls.push(control);
           } else {
@@ -66,9 +69,7 @@ export default function(sb) {
       // TODO Интерфейс продумать
       // TODO Как передать аргументы в template()
       let glassPanel = await add({ type: 'GlassPanel' });
-      $glassPanel = $(glassPanel.el)
-        .hide()
-        .appendTo(document.body);
+      $glassPanel = $(glassPanel.render()).hide().appendTo(document.body);
       on('fadeIn', () => $glassPanel.show());
       on('fadeOut', () => $glassPanel.hide());
 
@@ -82,17 +83,17 @@ export default function(sb) {
         await once('destroy');
         emitter.end();
         observer.disconnect();
-      });
+      }); // .log('mutationsStream');
 
-      routesStream = FRP.fromEvents(router, 'route');
+      routesStream = FRP.fromEvents(router, 'route').log('routesStream');
 
       // Дбавленные в DOM элементы
       addedDomElementsStream = mutationsStream
         .map(_.property('added'))
-        .flatten();
+        .flatten().log('addedDomElementsStream');
 
       addedMenubarsStream = addedDomElementsStream
-        .filter(utils.isRole('menubar'));
+        .filter(utils.isRole('menubar')).log('addedMenubarsStream');
 
       mouseDownStream = FRP.fromEvents(document.body, 'mousedown');
 
@@ -100,7 +101,7 @@ export default function(sb) {
 
       pushDownButtonsStream = mouseDownStream
         .map(utils.mouseEventToRoleElementMapper('button'))
-        .filter(_.negate(_.isNull));
+        .filter(_.negate(_.isNull)).log('pushDownButtonsStream');
 
       // clickedButtonsStream = mouseClickStream
       //   .map(utils.mouseEventToRoleElementMapper('button'))
@@ -108,7 +109,7 @@ export default function(sb) {
 
       clickedMenuItemsStream = mouseClickStream
         .map(utils.mouseEventToRoleElementMapper('menuitem'))
-        .filter(_.negate(_.isNull));
+        .filter(_.negate(_.isNull)).log('clickedMenuItemsStream');
 
       poppedUpMenubarsStream = pushDownButtonsStream
         .sampledBy(addedMenubarsStream)
@@ -117,8 +118,8 @@ export default function(sb) {
         .map(val => ({ name: val[0], el: val[1] }));
 
       appContextProperty = routesStream
-        .map((state) => state.section + (state.action ? `/${state.action}` : ''))
-        .toProperty(() => router.getHashPath());
+        .map(state => state.path)
+        .toProperty(() => router.getPath());
 
       poppedUpMenubarInfosStream = appContextProperty
         .sampledBy(addedMenubarsStream)
