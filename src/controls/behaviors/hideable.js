@@ -1,12 +1,13 @@
 import stampit from 'stampit';
-import $ from 'jquery';
 
 
 export default stampit().methods({
   hide() {
-    $(this.el).hide();
+    this.$el.hide();
+    return this;
   },
   show() {
-    $(this.el).show();
+    this.$el.show();
+    return this;
   }
 });

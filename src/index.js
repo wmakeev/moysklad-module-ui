@@ -1,13 +1,13 @@
 import _                 from 'lodash';
 import $                 from 'jquery';
 import FRP               from 'kefir';
-import MoyskladRouter    from 'moysklad-router';
+import moyskladRouter    from 'moysklad-router';
 import MutationSummary   from 'mutation-summary';
 import Simulate          from 'simulate';
 import queries           from './queries';
 import * as utils        from './utils';
 import timeout           from './utils';
-import * as controlsList from './controls/index';
+import * as controlsSet from './controls/index';
 import * as uiConst      from './app-ui-const';
 import bufferedMenubarItemsModificationsEmiter from './buffered-menubaritems-modifications-emiter';
 
@@ -29,12 +29,11 @@ export default function(sb) {
   let poppedUpMenubarModificationsStream;
   let $glassPanel;
 
-  let router = new MoyskladRouter();
-  let { on, off, once, emit, add, fadeIn, fadeOut } = sb;
+  let { log, error, on, off, once, emit, add, fadeIn, fadeOut } = sb;
 
   return {
 
-    async init({ appName }) {
+    init({ appName }) {
       if (!appName) {
         throw new Error('appName should be provided in module options');
       }
@@ -43,13 +42,17 @@ export default function(sb) {
       // let appUidPrefix              = `${appName}-uid-`;
       // let appMenuItemClassName      = `${appName}-MenuItem`;
 
+      // Инициализация роутера
+      let router = moyskladRouter().start();
       router.start();
+      once('destroy').then(() => router.stop());
+
       uiItemsModificationsStream = FRP.pool();
 
       on('add', data => {
         let controls = [];
         (data instanceof Array ? data : [{ item: data }]).forEach(({ item, options }) => {
-          let controlStamp = controlsList[item.type]({ appName });
+          let controlStamp = controlsSet[item.type]({ appName });
           if (controlStamp) {
             let control = controlStamp(_.omit(item, 'type'));
             uiItemsModificationsStream.plug(FRP.constant({
@@ -68,21 +71,24 @@ export default function(sb) {
 
       // TODO Интерфейс продумать
       // TODO Как передать аргументы в template()
-      let glassPanel = await add({ type: 'GlassPanel' });
-      $glassPanel = $(glassPanel.render()).hide().appendTo(document.body);
-      on('fadeIn', () => $glassPanel.show());
-      on('fadeOut', () => $glassPanel.hide());
+      add({ type: 'GlassPanel' }).then((glassPanel) => {
+        glassPanel.render().hide();
+        on('fadeIn', () => glassPanel.show());
+        on('fadeOut', () => glassPanel.hide());
+        once('destroy').then(() => glassPanel.$el.detach());
+      });
 
       // Все заданные измемения на странице
-      mutationsStream = FRP.stream(async function foo(emitter) {
+      mutationsStream = FRP.stream((emitter) => {
         let observer = new MutationSummary({
           callback: summaries =>
             summaries.forEach(summary => emitter.emit(summary)),
           queries,
         });
-        await once('destroy');
-        emitter.end();
-        observer.disconnect();
+        once('destroy').then(() => {
+          emitter.end();
+          observer.disconnect();
+        });
       }); // .log('mutationsStream');
 
       routesStream = FRP.fromEvents(router, 'route').log('routesStream');
@@ -90,7 +96,7 @@ export default function(sb) {
       // Дбавленные в DOM элементы
       addedDomElementsStream = mutationsStream
         .map(_.property('added'))
-        .flatten().log('addedDomElementsStream');
+        .flatten(); // .log('addedDomElementsStream');
 
       addedMenubarsStream = addedDomElementsStream
         .filter(utils.isRole('menubar')).log('addedMenubarsStream');
@@ -119,7 +125,7 @@ export default function(sb) {
 
       appContextProperty = routesStream
         .map(state => state.path)
-        .toProperty(() => router.getPath());
+        .toProperty(() => router.getPath()).log('appContextProperty');
 
       poppedUpMenubarInfosStream = appContextProperty
         .sampledBy(addedMenubarsStream)
@@ -163,28 +169,24 @@ export default function(sb) {
         // { type, item, options }
         menuItemsModificationsStream.onValue(({ type, item }) => {
           if (type === 'add') {
-            clickedMenuItemsStream.onValue(async function (menuitemEl) {
+            clickedMenuItemsStream.onValue((menuitemEl) => {
               if (menuitemEl.getAttribute) {
                 let id = menuitemEl.getAttribute(dataAppId);
                 if (id === item.id) {
                   Simulate.mousedown(document.getElementById('site'));
-                  // console.log(`Нажато меню: ${item.name}`);
+                  log.debug(`Нажато меню: ${item.name}`);
                   let action = item.action;
                   if (action) {
-                    await timeout(100);
-                    fadeIn();
-                    await timeout(100);
-                    let result;
-                    try {
-                      result = await action(item);
-                    } catch (err) {
-                      // TODO alert;
-                      alert('Ошибка: ' + err.message);
-                      emit('error', err);
-                      console.error(err);
-                    }
-                    if (result) { console.log(result); }
-                    fadeOut(); // $glassPanel.hide();
+                    timeout(100)
+                      .then(() => fadeIn())
+                      .then(() => timeout(100))
+                      .then(() => action(item))
+                      .then(result => log(result))
+                      .catch((err) => {
+                        alert('Ошибка: ' + err.message);
+                        error(err);
+                      })
+                      .then(() => fadeOut());
                   }
                 }
               }
@@ -195,8 +197,6 @@ export default function(sb) {
     },
 
     destroy() {
-      router.stop();
-      $glassPanel.detach();
       off('add');
       emit('destroy');
     },
