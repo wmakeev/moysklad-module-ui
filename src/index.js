@@ -27,7 +27,6 @@ export default function(sb) {
   let poppedUpMenubarInfosStream;
   let menuItemsModificationsStream;
   let poppedUpMenubarModificationsStream;
-  let $glassPanel;
 
   let { log, error, on, off, once, emit, add, fadeIn, fadeOut } = sb;
 
@@ -72,7 +71,7 @@ export default function(sb) {
       // TODO Интерфейс продумать
       // TODO Как передать аргументы в template()
       add({ type: 'GlassPanel' }).then((glassPanel) => {
-        glassPanel.render().hide();
+        glassPanel.render().hide().appendTo(document.body);
         on('fadeIn', () => glassPanel.show());
         on('fadeOut', () => glassPanel.hide());
         once('destroy').then(() => glassPanel.$el.detach());
