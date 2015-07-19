@@ -42,7 +42,7 @@ export default function(sb) {
       // let appUidPrefix              = `${appName}-uid-`;
       // let appMenuItemClassName      = `${appName}-MenuItem`;
 
-      // Инициализация роутера
+      // Router initialization
       let router = moyskladRouter().start();
       router.start();
       once('destroy').then(() => router.stop());
